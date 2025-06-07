@@ -22,31 +22,49 @@ export async function getSession() {
 export async function getUserDetails() {
   const supabase = createServerSupabaseClient();
   try {
-    const { data: userDetails } = await supabase
+    const { data: userDetails, error } = await supabase
       .from('users')
-      .select('*')
-      .single();
-    return userDetails;
+      .select('*');
+    
+    if (error) {
+      console.error('Error fetching user details:', error);
+      return null;
+    }
+    
+    // 返回第一条记录，如果没有数据则返回 null
+    return userDetails && userDetails.length > 0 ? userDetails[0] : null;
   } catch (error) {
     console.error('Error:', error);
     return null;
   }
 }
 
-export async function getSubscription() {
+export async function getSubscriptions() {
   const supabase = createServerSupabaseClient();
   try {
-    const { data: subscription } = await supabase
+    const { data: subscriptions, error } = await supabase
       .from('subscriptions')
       .select('*, prices(*, products(*))')
       .in('status', ['trialing', 'active'])
-      .single()
-      .throwOnError();
-    return subscription;
+      .order('created', { ascending: false });
+    
+    if (error) {
+      console.error('Error fetching subscriptions:', error);
+      return [];
+    }
+    
+    // 返回所有活跃订阅，按创建时间降序排列
+    return subscriptions || [];
   } catch (error) {
     console.error('Error:', error);
-    return null;
+    return [];
   }
+}
+
+// 保留原函数以向后兼容，但现在它返回最新的订阅
+export async function getSubscription() {
+  const subscriptions = await getSubscriptions();
+  return subscriptions.length > 0 ? subscriptions[0] : null;
 }
 
 export const getActiveProductsWithPrices = async () => {

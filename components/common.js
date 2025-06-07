@@ -32,13 +32,13 @@ export const tiers = [
       priceStripe: {
         monthly: {
           type: 'recurring',
-          id: 'price_1RWwxjIJo7CvXFsFHyBN5GmY',
-          product_id: 'prod_SRqeLVmKg20W3j'
+          id: 'price_1RXI1KIJo7CvXFsFoO9SzkEe',
+          product_id: 'prod_SSCQvQb8iyjdok'
         },
         annually: {
           type: 'recurring',
-          id: 'price_1RWwxjIJo7CvXFsF8VeKpPig',
-          product_id: 'prod_SRqeLVmKg20W3j'
+          id: 'price_1RXI1KIJo7CvXFsF4McrONsR',
+          product_id: 'prod_SSCQvQb8iyjdok'
         }
        
       },
@@ -69,13 +69,13 @@ export const tiers = [
       priceStripe: {
         monthly: {
           type: 'recurring',
-          id: 'price_1RWwxjIJo7CvXFsFwdMLqavm',
-          product_id: 'prod_SRqeLVmKg20W3j'
+          id: 'price_1RXI1KIJo7CvXFsFnMn0EPxq',
+          product_id: 'prod_SSCQvQb8iyjdok'
         },
         annually: {
           type: 'recurring',
-          id: 'price_1RWwwzIJo7CvXFsFYHjlhatL',
-          product_id: 'prod_SRqeLVmKg20W3j'
+          id: 'price_1RXI1KIJo7CvXFsFTD89ZYUX',
+          product_id: 'prod_SSCQvQb8iyjdok'
         }
        
       },

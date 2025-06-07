@@ -7,7 +7,8 @@ import { getURL } from '@/libs/helpers';
 export async function POST(req) {
   if (req.method === 'POST') {
     try {
-      const supabase = createRouteHandlerClient({cookies});
+      const cookieStore = await cookies();
+      const supabase = createRouteHandlerClient({cookies: () => cookieStore});
       const {
         data: { user }
       } = await supabase.auth.getUser();
@@ -19,13 +20,30 @@ export async function POST(req) {
       });
 
       if (!customer) throw Error('Could not get customer');
-      const { url } = await stripe.billingPortal.sessions.create({
-        customer,
-        return_url: `${getURL()}/apps/subscription`
-      });
-      return new Response(JSON.stringify({ url }), {
-        status: 200
-      });
+      
+      try {
+        const { url } = await stripe.billingPortal.sessions.create({
+          customer,
+          return_url: `${getURL()}/apps/subscription`
+        });
+        return new Response(JSON.stringify({ url }), {
+          status: 200
+        });
+      } catch (stripeError) {
+        console.error('Stripe billing portal error:', stripeError);
+        if (stripeError.message?.includes('No configuration provided')) {
+          return new Response(
+            JSON.stringify({ 
+              error: { 
+                statusCode: 400, 
+                message: 'Customer portal is not configured. Please configure it in your Stripe dashboard at https://dashboard.stripe.com/test/settings/billing/portal' 
+              } 
+            }),
+            { status: 400 }
+          );
+        }
+        throw stripeError;
+      }
     } catch (err) {
       console.log(err);
       return new Response(

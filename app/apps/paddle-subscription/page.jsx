@@ -19,14 +19,25 @@ const page = () => {
 
 
   async function getUserPayData() {
-    const { data: payment } = await supabase
-      .from("user_payment_data")
-      .select("*")
-      .match({ user_id: userData?.id }).single()
-      .throwOnError();
-    debugger
-    console.log('payment: ', payment)
-    return payment
+    try {
+      const { data: payment, error } = await supabase
+        .from("user_payment_data")
+        .select("*")
+        .match({ user_id: userData?.id });
+      
+      if (error) {
+        console.error('Error fetching payment data:', error);
+        return null;
+      }
+      
+      // 如果有数据，返回第一条记录；如果没有数据，返回 null
+      const paymentData = payment && payment.length > 0 ? payment[0] : null;
+      console.log('payment: ', paymentData);
+      return paymentData;
+    } catch (error) {
+      console.error('Error in getUserPayData:', error);
+      return null;
+    }
   }
 
   async function getUserPayHistory() {
@@ -40,7 +51,12 @@ const page = () => {
   }
 
   async function UpdatePayment() {
-    const payData = await getUserPayData({ supabase: supabase });
+    const payData = await getUserPayData();
+    if (!payData) {
+      toast.error("Unable to fetch payment data");
+      return;
+    }
+    
     window.onPaddleSuccess = function () {
       toast.success("Your payment method was updated successfully");
       // setPaddleChangeTime(Date.now());
@@ -61,7 +77,12 @@ const page = () => {
       toast.success('Free plan does not need to be canceled')
       return
     }
-    const payData = await getUserPayData({ supabase: supabase });
+    const payData = await getUserPayData();
+    if (!payData) {
+      toast.error("Unable to fetch payment data");
+      return;
+    }
+    
     window.onPaddleSuccess = function () {
       toast.success(
         "Your subscription was cancelled successfully, We'll miss you 😢"
@@ -85,9 +106,8 @@ const page = () => {
 
   useEffect(() => {
     (async () => {
-      const payData = await getUserPayData({ supabase: supabase })
-      debugger
-
+      const payData = await getUserPayData() || {}; // 如果返回 null，使用空对象
+      
       if (payData?.subscription_id) {
         const result = tiers.filter((item) => item?.pricePaddle?.monthly?.plan_id == parseInt(payData?.subscription_plan_id) || item?.pricePaddle?.annually?.plan_id == parseInt(payData?.subscription_plan_id))
         if (Object.keys(result).length > 0) {
@@ -119,10 +139,8 @@ const page = () => {
       })
       setHistorys(data)
 
-
       setSubData(payData)
       setLoading(false)
-
     })()
   }, [])
 
